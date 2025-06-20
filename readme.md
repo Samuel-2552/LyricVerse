@@ -71,6 +71,41 @@ LyricVerse is a collaborative platform for managing, editing, and sharing a larg
    yarn start
    ```
 
+### Setting up MongoDB on Ubuntu Server
+
+To install MongoDB 8.0 on an Ubuntu server, follow these steps:
+
+1. **Install gnupg and curl:**
+   ```bash
+   sudo apt-get install gnupg curl
+   ```
+2. **Add MongoDB GPG key:**
+   ```bash
+   curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | \
+      sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg \
+      --dearmor
+   ```
+3. **Add MongoDB repository:**
+   ```bash
+   echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
+   ```
+4. **Update package list:**
+   ```bash
+   sudo apt-get update
+   ```
+5. **Install MongoDB:**
+   ```bash
+   sudo apt-get install -y mongodb-org
+   ```
+6. **Start MongoDB service:**
+   ```bash
+   sudo systemctl start mongod
+   ```
+7. **Check MongoDB status:**
+   ```bash
+   sudo systemctl status mongod
+   ```
+
 ## Contributing
 
 1. Fork the repository
