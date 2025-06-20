@@ -1,0 +1,62 @@
+[{
+  "_id": 1,
+  "planType": "Free",
+  "accessibles": [
+    1
+  ]
+},
+{
+  "_id": 2,
+  "planType": "Basic",
+  "accessibles": [
+    1,
+    2
+  ]
+},
+{
+  "_id": 3,
+  "planType": "Plus",
+  "accessibles": [
+    1,
+    2,
+    3
+  ]
+},
+{
+  "_id": 4,
+  "planType": "Premium",
+  "accessibles": [
+    1,
+    2,
+    3,
+    4,
+    5
+  ]
+},
+{
+  "_id": 5,
+  "planType": "Admin",
+  "accessibles": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ]
+},
+{
+  "_id": 6,
+  "planType": "Staff",
+  "accessibles": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ]
+}]

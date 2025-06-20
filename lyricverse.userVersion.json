@@ -1,0 +1,16 @@
+[{
+  "_id": 1,
+  "song_id": 1,
+  "version_no": 1,
+  "lyrics": "Some lyrics of the song go here...",
+  "transliteration": null,
+  "user_id": 7
+},
+{
+  "_id": 2,
+  "song_id": 1,
+  "version_no": 2,
+  "lyrics": "Revised lyrics with updated lines...",
+  "transliteration": "Raagamum swaramum...",
+  "user_id": 8
+}]

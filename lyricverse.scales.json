@@ -1,0 +1,168 @@
+[{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9e9"
+  },
+  "scale_id": 1,
+  "name": "C Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9ea"
+  },
+  "scale_id": 2,
+  "name": "C Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9eb"
+  },
+  "scale_id": 3,
+  "name": "C# Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9ec"
+  },
+  "scale_id": 4,
+  "name": "C# Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9ed"
+  },
+  "scale_id": 5,
+  "name": "D Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9ee"
+  },
+  "scale_id": 6,
+  "name": "D Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9ef"
+  },
+  "scale_id": 7,
+  "name": "D# Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f0"
+  },
+  "scale_id": 8,
+  "name": "D# Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f1"
+  },
+  "scale_id": 9,
+  "name": "E Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f2"
+  },
+  "scale_id": 10,
+  "name": "E Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f3"
+  },
+  "scale_id": 11,
+  "name": "F Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f4"
+  },
+  "scale_id": 12,
+  "name": "F Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f5"
+  },
+  "scale_id": 13,
+  "name": "F# Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f6"
+  },
+  "scale_id": 14,
+  "name": "F# Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f7"
+  },
+  "scale_id": 15,
+  "name": "G Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f8"
+  },
+  "scale_id": 16,
+  "name": "G Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9f9"
+  },
+  "scale_id": 17,
+  "name": "G# Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9fa"
+  },
+  "scale_id": 18,
+  "name": "G# Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9fb"
+  },
+  "scale_id": 19,
+  "name": "A Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9fc"
+  },
+  "scale_id": 20,
+  "name": "A Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9fd"
+  },
+  "scale_id": 21,
+  "name": "A# Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9fe"
+  },
+  "scale_id": 22,
+  "name": "A# Minor"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45c9ff"
+  },
+  "scale_id": 23,
+  "name": "B Major"
+},
+{
+  "_id": {
+    "$oid": "68546b59f243c97e9c45ca00"
+  },
+  "scale_id": 24,
+  "name": "B Minor"
+}]

@@ -1,0 +1,80 @@
+[{
+  "_id": 1,
+  "name": "Sam",
+  "email": "sjoseph2552@gmail.com",
+  "password": "hashed_pw",
+  "ph_no": "8279598383",
+  "purpose": "Jamming",
+  "active": true,
+  "verified": true,
+  "created_at": "2025-06-19T18:50:27.734960",
+  "deactivated_at": null,
+  "plan": 5,
+  "blocked": false,
+  "wp_id": [
+    {
+      "id": 1,
+      "role": "admin",
+      "invited_user": []
+    },
+    {
+      "id": 2,
+      "role": "viewer"
+    }
+  ]
+},
+{
+  "_id": 2,
+  "name": "Mithesh",
+  "email": "mithesh@gmail.com",
+  "password": "hashed_pw_2",
+  "ph_no": "9123456780",
+  "purpose": "Practice",
+  "active": true,
+  "verified": true,
+  "created_at": "2025-06-19T18:50:27.734974",
+  "deactivated_at": null,
+  "plan": 5,
+  "blocked": false,
+  "wp_id": [
+    {
+      "id": 2,
+      "role": "admin",
+      "invited_user": [
+        {
+          "email": "sjoseph2552@gmail.com",
+          "role": "viewer"
+        },
+        {
+          "email": "tharun@gmail.com",
+          "role": "editor"
+        }
+      ]
+    }
+  ]
+},
+{
+  "_id": 3,
+  "name": "Tharun",
+  "email": "tharun@gmail.com",
+  "password": "hashed_pw_3",
+  "ph_no": "9988776655",
+  "purpose": "Learning",
+  "active": true,
+  "verified": false,
+  "created_at": "2025-06-19T18:50:27.734977",
+  "deactivated_at": null,
+  "plan": 3,
+  "blocked": false,
+  "wp_id": [
+    {
+      "id": 3,
+      "role": "admin",
+      "invited_user": []
+    },
+    {
+      "id": 2,
+      "role": "editor"
+    }
+  ]
+}]
