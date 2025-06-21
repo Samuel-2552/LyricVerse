@@ -21,6 +21,27 @@ LyricVerse is a collaborative platform for managing, editing, and sharing a larg
 - **Backend**: Express (Node.js)
 - **Database**: MongoDB
 
+## API Integration
+
+The application integrates with the backend API at `https://devback.oilnwine.tech` for authentication:
+
+### Authentication Endpoints
+
+- **POST** `/api/auth/signup` - Register new user
+  - Parameters: `name`, `email`, `password`, `phone`, `purpose`
+  - Access: Public
+
+- **POST** `/api/auth/login` - Login user
+  - Parameters: `email`, `password`
+  - Access: Public
+
+### Authentication Flow
+
+1. Users can sign up with required fields (name, email, password, phone, purpose)
+2. Users can log in with email and password
+3. JWT tokens are stored in localStorage for authenticated requests
+4. All subsequent API requests include the Authorization header with the Bearer token
+
 ## Getting Started
 
 ### Prerequisites

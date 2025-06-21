@@ -9,11 +9,21 @@ function App() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Simulate auth check
+    // Check for existing authentication
     const checkAuth = () => {
       const savedUser = localStorage.getItem('lyricverse_user');
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
+      const token = localStorage.getItem('lyricverse_token');
+      
+      if (savedUser && token) {
+        try {
+          const userData = JSON.parse(savedUser);
+          setUser(userData);
+        } catch (error) {
+          console.error('Error parsing saved user data:', error);
+          // Clear invalid data
+          localStorage.removeItem('lyricverse_user');
+          localStorage.removeItem('lyricverse_token');
+        }
       }
       setIsLoading(false);
     };
@@ -29,6 +39,7 @@ function App() {
   const handleLogout = () => {
     setUser(null);
     localStorage.removeItem('lyricverse_user');
+    localStorage.removeItem('lyricverse_token');
   };
 
   if (isLoading) {

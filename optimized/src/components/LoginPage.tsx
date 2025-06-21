@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
-import { Music, Heart, Sparkles, Mail, Lock, User as UserIcon } from 'lucide-react';
+import { Music, Heart, Sparkles, Mail, Lock, User as UserIcon, Phone } from 'lucide-react';
 import FloatingCharacter from './FloatingCharacter';
 import { User } from '../types';
+import { apiService, SignupRequest, LoginRequest } from '../services/api';
 
 interface LoginPageProps {
   onLogin: (user: User) => void;
@@ -14,30 +15,168 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
     name: '',
     email: '',
     password: '',
+    phone: '',
     purpose: ''
   });
   const [musicEnabled, setMusicEnabled] = useState(false);
   const [purposeError, setPurposeError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const { scrollY } = useScroll();
   const backgroundY = useTransform(scrollY, [0, 1000], [0, -200]);
   const characterY = useTransform(scrollY, [0, 1000], [0, -100]);
   const textOpacity = useTransform(scrollY, [0, 300], [1, 0.3]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.purpose) {
-      setPurposeError('Please select a purpose for registration.');
+    console.log('🔐 Starting authentication process...');
+    console.log('📝 Form data:', formData);
+    console.log('📝 Is signup mode:', isSignUp);
+    
+    setError('');
+    
+    // Validate required fields
+    if (isSignUp) {
+      console.log('🔍 Validating signup fields...');
+      if (!formData.name.trim()) {
+        console.error('❌ Validation failed: Name is required');
+        setError('Name is required');
+        return;
+      }
+      if (!formData.phone.trim()) {
+        console.error('❌ Validation failed: Phone number is required');
+        setError('Phone number is required');
+        return;
+      }
+      if (!formData.purpose) {
+        console.error('❌ Validation failed: Purpose is required');
+        setPurposeError('Please select a purpose for registration.');
+        return;
+      }
+      console.log('✅ Signup validation passed');
+    }
+    
+    if (!formData.email.trim()) {
+      console.error('❌ Validation failed: Email is required');
+      setError('Email is required');
       return;
     }
+    
+    if (!formData.password.trim()) {
+      console.error('❌ Validation failed: Password is required');
+      setError('Password is required');
+      return;
+    }
+    
+    console.log('✅ All validation passed');
     setPurposeError('');
-    const user: User = {
-      id: Date.now().toString(),
-      name: formData.name || formData.email.split('@')[0],
-      email: formData.email,
-      purpose: formData.purpose
-    };
-    onLogin(user);
+    setIsLoading(true);
+    
+    try {
+      if (isSignUp) {
+        console.log('📤 Preparing signup data...');
+        const signupData: SignupRequest = {
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          password: formData.password,
+          phone: formData.phone.trim(),
+          purpose: formData.purpose
+        };
+        
+        console.log('📤 Signup data to send:', signupData);
+        console.log('🌐 Calling signup API...');
+        
+        const response = await apiService.signup(signupData);
+        
+        console.log('📥 Signup API response received:', response);
+        
+        if (response.success && response.user) {
+          console.log('✅ Signup successful, processing user data...');
+          // Store token if provided
+          if (response.token) {
+            console.log('🔑 Storing authentication token...');
+            localStorage.setItem('lyricverse_token', response.token);
+          }
+          
+          const user: User = {
+            id: response.user.id,
+            name: response.user.name,
+            email: response.user.email,
+            phone: formData.phone,
+            purpose: response.user.purpose
+          };
+          
+          console.log('👤 User object created:', user);
+          console.log('🚀 Calling onLogin callback...');
+          onLogin(user);
+        } else {
+          console.error('❌ Signup failed:', response.message);
+          setError(response.message || 'Signup failed');
+        }
+      } else {
+        console.log('📤 Preparing login data...');
+        const loginData: LoginRequest = {
+          email: formData.email.trim(),
+          password: formData.password
+        };
+        
+        console.log('📤 Login data to send:', loginData);
+        console.log('🌐 Calling login API...');
+        
+        const response = await apiService.login(loginData);
+        
+        console.log('📥 Login API response received:', response);
+        
+        if (response.success && response.user) {
+          console.log('✅ Login successful, processing user data...');
+          // Store token if provided
+          if (response.token) {
+            console.log('🔑 Storing authentication token...');
+            localStorage.setItem('lyricverse_token', response.token);
+          }
+          
+          const user: User = {
+            id: response.user.id,
+            name: response.user.name,
+            email: response.user.email,
+            purpose: response.user.purpose
+          };
+          
+          console.log('👤 User object created:', user);
+          console.log('🚀 Calling onLogin callback...');
+          onLogin(user);
+        } else {
+          console.error('❌ Login failed:', response.message);
+          setError(response.message || 'Login failed');
+        }
+      }
+    } catch (err) {
+      console.error('💥 Authentication error caught:', err);
+      console.error('💥 Error type:', typeof err);
+      console.error('💥 Error instanceof Error:', err instanceof Error);
+      if (err instanceof Error) {
+        console.error('💥 Error message:', err.message);
+        console.error('💥 Error stack:', err.stack);
+      }
+      
+      // Provide user-friendly error messages
+      let userMessage = 'An unexpected error occurred';
+      if (err instanceof Error) {
+        if (err.message === 'Failed to fetch') {
+          userMessage = 'Unable to connect to the server. This might be due to CORS configuration. Please contact the administrator.';
+        } else if (err.message.includes('CORS')) {
+          userMessage = 'Server configuration issue. Please contact the administrator.';
+        } else {
+          userMessage = err.message;
+        }
+      }
+      
+      setError(userMessage);
+    } finally {
+      console.log('🏁 Authentication process completed');
+      setIsLoading(false);
+    }
   };
 
   const FloatingNote = ({ delay = 0, size = 20, className = "" }) => (
@@ -195,6 +334,20 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   </div>
                 )}
 
+                {isSignUp && (
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+                    <input
+                      type="tel"
+                      placeholder="Phone Number"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      className="w-full pl-12 pr-4 py-3 md:py-4 bg-white/50 backdrop-blur-sm border border-white/30 rounded-xl md:rounded-2xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-transparent transition-all font-inter text-sm md:text-base"
+                      required={isSignUp}
+                    />
+                  </div>
+                )}
+
                 <div className="relative">
                   <Mail className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
                   <input
@@ -243,13 +396,32 @@ const LoginPage: React.FC<LoginPageProps> = ({ onLogin }) => {
                   </div>
                 )}
 
+                {/* Error Display */}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                    <p className="text-red-600 text-sm font-inter">{error}</p>
+                  </div>
+                )}
+
                 <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ scale: isLoading ? 1 : 1.02 }}
+                  whileTap={{ scale: isLoading ? 1 : 0.98 }}
                   type="submit"
-                  className="w-full py-3 md:py-4 bg-gradient-to-r from-rose-500 to-violet-500 text-white rounded-xl md:rounded-2xl font-inter font-medium hover:shadow-lg transition-all text-sm md:text-base"
+                  disabled={isLoading}
+                  className={`w-full py-3 md:py-4 rounded-xl md:rounded-2xl font-inter font-medium transition-all text-sm md:text-base ${
+                    isLoading 
+                      ? 'bg-gray-400 text-white cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-rose-500 to-violet-500 text-white hover:shadow-lg'
+                  }`}
                 >
-                  {isSignUp ? 'Create Account' : 'Sign In'}
+                  {isLoading ? (
+                    <div className="flex items-center justify-center space-x-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>{isSignUp ? 'Creating Account...' : 'Signing In...'}</span>
+                    </div>
+                  ) : (
+                    isSignUp ? 'Create Account' : 'Sign In'
+                  )}
                 </motion.button>
 
                 <div className="text-center">
