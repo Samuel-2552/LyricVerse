@@ -15,12 +15,13 @@ app.use(express.json());
 
 // Mock user for testing (add before your routes in app.js)
 app.use((req, res, next) => {
-    req.user = { role: 'admin' }; // Change to 'user' to test permissions
+    req.user = { role: 'user' }; // Change to 'user' to test permissions
     next();
   });
 
 app.use('/songs', songRoutes);
 app.use('/user-songs', userSongRoutes);
+
 
 // Test route
 app.get('/', (req, res) => {

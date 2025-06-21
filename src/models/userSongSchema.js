@@ -1,22 +1,18 @@
 const Joi = require('joi');
 
-const songSchema = Joi.object({
+const userSongSchema = Joi.object({
   title: Joi.string().required(),
   alt_title: Joi.string().optional(),
   language: Joi.string().required(),
   author: Joi.string().required(),
   link: Joi.string().uri().optional(),
   genre: Joi.string().optional(),
-  draft: Joi.boolean().default(true),
   version_id: Joi.number().optional(),
-  staff_user_id: Joi.number().required(),
-  created_at: Joi.string().optional(), // Will be auto-generated
   edited_at: Joi.string().optional(), // Will be auto-generated
-  edited_by_staff: Joi.number().optional(),
   scale_id: Joi.number().optional(),
-  tag_id: Joi.number().optional(),
-  likes: Joi.number().default(0),
-  views: Joi.number().default(0)
+  song_id: Joi.number().optional(), // Reference to master song (if based on one)
+  user_id: Joi.number().required(),
+  tag_id: Joi.number().optional()
 });
 
-module.exports = songSchema;
+module.exports = userSongSchema;

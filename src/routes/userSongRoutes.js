@@ -7,6 +7,7 @@ router.get('/', userSongController.getAllUserSongs);
 router.post('/', userSongController.createUserSong);
 router.get('/:id', userSongController.getUserSongById);
 router.patch('/:id', userSongController.updateUserSong);
+router.delete('/:id', userSongController.deleteUserSong);
 
 // User Song Versions
 router.get('/:id/versions', userSongController.getUserSongVersions);
