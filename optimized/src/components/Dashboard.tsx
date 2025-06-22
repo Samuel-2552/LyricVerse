@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Music, 
@@ -15,9 +15,10 @@ import {
   Globe,
   Menu,
   X,
-  User
+  User,
+  Briefcase
 } from 'lucide-react';
-import { User as UserType } from '../types';
+import { User as UserType, Song as SongType } from '../types';
 import SongManager from './SongManager';
 import SongDisplay from './SongDisplay';
 import ChoirView from './ChoirView';
@@ -26,6 +27,8 @@ import BibleLookup from './BibleLookup';
 import AddSongModal from './AddSongModal';
 import ProfileModal from './ProfileModal';
 import UpgradePlanModal from './UpgradePlanModal';
+import SongDetailsModal from './SongDetailsModal';
+import Workspace from './Workspace';
 
 interface DashboardProps {
   user: UserType;
@@ -34,15 +37,57 @@ interface DashboardProps {
 
 const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const [activeTab, setActiveTab] = useState('home');
-  const [selectedSong, setSelectedSong] = useState(null);
+  const [selectedSong, setSelectedSong] = useState<SongType | null>(null);
+  const [editingSong, setEditingSong] = useState<SongType | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [addSongOpen, setAddSongOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
+  const [songs, setSongs] = useState<SongType[]>([
+    {
+      id: '1', title: 'Amazing Grace', author: 'John Newton',
+      lyrics: 'G   C      G      D\\nAmazing grace, how sweet the sound\\nG     C        G      D    G\\nThat saved a wretch like me',
+      alternateTitle: 'अद्भुत अनुग्रह', language: 'english', category: 'Hymns', chords: 'G C G D',
+      createdAt: new Date(), updatedAt: new Date(Date.now() - 2 * 3600 * 1000),
+      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+    },
+    {
+      id: '2', title: 'How Great Thou Art', author: 'Carl Boberg', lyrics: 'O Lord my God...',
+      alternateTitle: 'कितना महान है तू', language: 'english', category: 'Worship', chords: 'C F C G',
+      createdAt: new Date(), updatedAt: new Date(Date.now() - 24 * 3600 * 1000),
+      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+    },
+    {
+      id: '3', title: 'येशु नाम सुन्दर', author: 'Unknown', lyrics: 'येशु नाम सुन्दर नाम...',
+      alternateTitle: 'Jesus Name Beautiful', language: 'hindi', category: 'Praise', chords: 'D G A D',
+      createdAt: new Date(), updatedAt: new Date(Date.now() - 3 * 24 * 3600 * 1000),
+      audioUrl: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3'
+    }
+  ]);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleSaveSong = (updatedSong: SongType) => {
+    setSongs(songs.map(s => s.id === updatedSong.id ? updatedSong : s));
+    if (selectedSong?.id === updatedSong.id) setSelectedSong(updatedSong);
+  };
+  
+  const handleSelectSong = (song: SongType) => {
+    setSelectedSong(song);
+    setActiveTab('song-display');
+  };
+
   const tabs = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'songs', label: 'Songs', icon: Music },
+    { id: 'workspace', label: 'Workspace', icon: Briefcase },
     { id: 'choir', label: 'Choir View', icon: Users },
     { id: 'projection', label: 'Projection', icon: Monitor },
     { id: 'bible', label: 'Bible', icon: BookOpen },
@@ -59,19 +104,37 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
   const floatingButtons = [
     { id: 'home', icon: Home, label: 'Home' },
     { id: 'songs', icon: Music, label: 'Songs' },
+    { id: 'workspace', icon: Briefcase, label: 'Workspace' },
     { id: 'bible', icon: BookOpen, label: 'Bible' },
   ];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'songs':
-        return <SongManager onSelectSong={setSelectedSong} onAddNewSong={() => setAddSongOpen(true)} />;
-      case 'choir':
-        return <ChoirView selectedSong={selectedSong} />;
+      case 'song-display':
+        return <SongDisplay 
+                  song={selectedSong!} 
+                  onBack={() => { setSelectedSong(null); setActiveTab('songs'); }}
+                  onSave={handleSaveSong} 
+                  onGoToProjection={() => setActiveTab('projection')}
+               />;
       case 'projection':
-        return <ProjectionMode selectedSong={selectedSong} />;
+        return <ProjectionMode 
+                  selectedSong={selectedSong!} 
+                  onBackToManager={() => setActiveTab('songs')} 
+               />;
+      case 'songs':
+        return <SongManager 
+                  songs={songs} 
+                  onSelectSong={handleSelectSong} 
+                  onAddSong={() => setAddSongOpen(true)}
+                  onEditSong={(song) => setEditingSong(song)} 
+               />;
+      case 'choir':
+        return <ChoirView songs={songs} />;
       case 'bible':
         return <BibleLookup />;
+      case 'workspace':
+        return <Workspace />;
       default:
         return <DashboardHome user={user} setAddSongOpen={setAddSongOpen} setActiveTab={setActiveTab} />;
     }
@@ -217,7 +280,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
             >
-              {activeTab === 'home' ? <DashboardHome user={user} setAddSongOpen={setAddSongOpen} setActiveTab={setActiveTab} /> : renderContent()}
+              {activeTab === 'home' || activeTab === 'songs' ? renderContent() : <motion.div key={selectedSong?.id}>{renderContent()}</motion.div>}
             </motion.div>
           </AnimatePresence>
         </main>
@@ -242,6 +305,11 @@ const Dashboard: React.FC<DashboardProps> = ({ user, onLogout }) => {
         {upgradeOpen && (
           <UpgradePlanModal open={upgradeOpen} onClose={() => setUpgradeOpen(false)} user={user} />
         )}
+      </AnimatePresence>
+
+      {/* SongDetailsModal */}
+      <AnimatePresence>
+        {editingSong && <SongDetailsModal open={!!editingSong} song={editingSong} onClose={() => setEditingSong(null)} onSave={(updatedSong) => { handleSaveSong(updatedSong); setEditingSong(null); }} />}
       </AnimatePresence>
     </div>
   );

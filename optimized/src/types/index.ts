@@ -10,9 +10,11 @@ export interface Song {
   id: string;
   title: string;
   alternateTitle?: string;
+  author?: string;
   chords: string;
   lyrics: string;
   transliteration?: string;
+  audioUrl?: string;
   language: 'hindi' | 'tamil' | 'telugu' | 'malayalam' | 'english';
   category: string;
   createdAt: Date;

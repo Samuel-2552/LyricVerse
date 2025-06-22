@@ -1,95 +1,174 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { X, Edit, Save, Music } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { X, Edit, Music } from 'lucide-react';
+import FullScreenTextEditor from './FullScreenTextEditor'; // Assuming this component exists
 
 interface SongDetailsModalProps {
+  open: boolean;
   song: any;
   onClose: () => void;
   onSave: (updatedSong: any) => void;
 }
 
-const SongDetailsModal: React.FC<SongDetailsModalProps> = ({ song, onClose, onSave }) => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editableLyrics, setEditableLyrics] = useState(song.lyrics || '');
+const SongDetailsModal: React.FC<SongDetailsModalProps> = ({ open, song, onClose, onSave }) => {
+  const [isEditingLyrics, setIsEditingLyrics] = useState(false);
+  const [audioUrl, setAudioUrl] = useState('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setEditableLyrics(song.lyrics || 'No lyrics available.');
+    // Reset state when the song prop changes
+    if (song) {
+      setAudioUrl(song.audioUrl || '');
+    }
   }, [song]);
 
-  const handleSave = () => {
-    onSave({ ...song, lyrics: editableLyrics });
-    setIsEditing(false);
+  if (!open || !song) {
+    return null;
+  }
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsEditingLyrics(true);
+  };
+
+  const handleSaveLyrics = (lyrics: string) => {
+    onSave({ ...song, lyrics, audioUrl });
+    setIsEditingLyrics(false);
+  };
+
+  const handlePrimarySave = () => {
+    onSave({ ...song, audioUrl });
+    onClose();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // For a real app, you'd upload this file and get a URL.
+      // For this demo, we'll use a temporary blob URL.
+      const newUrl = URL.createObjectURL(file);
+      
+      // Revoke the old blob URL if it exists to prevent memory leaks
+      if (audioUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(audioUrl);
+      }
+
+      setAudioUrl(newUrl);
+    }
   };
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, y: 40, opacity: 0 }}
-        animate={{ scale: 1, y: 0, opacity: 1 }}
-        exit={{ scale: 0.95, y: 40, opacity: 0 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full mx-2 p-6 md:p-8 relative max-h-[80vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-start justify-between mb-4">
-            <div className="w-12 h-12 bg-gradient-to-r from-rose-400 to-violet-400 rounded-xl flex items-center justify-center mr-4">
-              <Music className="text-white" size={24} />
-            </div>
-            <div>
-              <h2 className="font-playfair text-2xl md:text-3xl font-bold text-gray-800">{song.title}</h2>
-              {song.alternateTitle && (
-                <p className="text-gray-600 font-inter text-md">{song.alternateTitle}</p>
-              )}
-            </div>
-            <div className="flex items-center ml-auto">
-                <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-white/50 rounded-lg transition-all"
-                >
-                {isEditing ? <X size={20}/> : <Edit size={20} />}
-                </button>
-                <button
-                className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
-                onClick={onClose}
-                >
-                <X size={22} />
-                </button>
-            </div>
-        </div>
-
-        <div className="overflow-y-auto flex-grow pr-2">
-          {isEditing ? (
-            <textarea
-              value={editableLyrics}
-              onChange={(e) => setEditableLyrics(e.target.value)}
-              className="w-full h-full min-h-[300px] p-4 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-rose-400 font-mono"
+    <>
+      <AnimatePresence>
+        {open && !isEditingLyrics && (
+          <>
+            <motion.div
+              className="fixed inset-0 bg-white/30 backdrop-blur-sm z-40"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
             />
-          ) : (
-            <p className="whitespace-pre-wrap font-mono text-gray-700 text-base leading-relaxed">
-              {editableLyrics}
-            </p>
-          )}
-        </div>
-        
-        {isEditing && (
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={handleSave}
-              className="flex items-center space-x-2 bg-gradient-to-r from-rose-500 to-violet-500 text-white px-6 py-2 rounded-xl font-inter hover:shadow-lg transition-all"
+            <div
+              className="fixed inset-0 flex items-center justify-center z-50"
+              onClick={onClose}
             >
-              <Save size={18} />
-              <span>Save</span>
-            </button>
-          </div>
+              <motion.div
+                className="bg-white rounded-2xl p-6 shadow-lg w-full max-w-md mx-4 relative"
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-start justify-between mb-5">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-pink-400 to-violet-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-violet-500/30">
+                      <Music className="text-white" size={28} />
+                    </div>
+                    <div>
+                      <h2 className="font-playfair text-2xl font-bold text-gray-800">{song.title}</h2>
+                      {song.alternateTitle && (
+                        <p className="text-gray-500 font-inter mt-1">{song.alternateTitle}</p>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors"
+                    onClick={handleEditClick}
+                  >
+                    <Edit size={18} />
+                  </button>
+                </div>
+
+                <p className="text-gray-600 font-inter text-base leading-relaxed mb-4">
+                  {song.lyrics?.substring(0, 120)}{song.lyrics?.length > 120 ? '...' : ''}
+                </p>
+
+                {/* Audio URL input */}
+                <div className="mb-4">
+                  <label className="block font-inter text-sm text-gray-700 mb-2">Audio (MP3 Link or Upload)</label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      className="flex-grow rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-rose-400 font-mono text-sm"
+                      placeholder="https://... or upload file"
+                      value={audioUrl}
+                      onChange={e => setAudioUrl(e.target.value)}
+                    />
+                    <button 
+                      className="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-inter text-sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Upload
+                    </button>
+                    <input 
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="audio/mp3,audio/mpeg"
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-2 mt-6">
+                  <button
+                    className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 font-inter"
+                    onClick={onClose}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="px-4 py-2 rounded-lg bg-rose-500 text-white hover:bg-rose-600 font-inter"
+                    onClick={handlePrimarySave}
+                  >
+                    Save Changes
+                  </button>
+                </div>
+
+                <button
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-700 transition-colors"
+                    onClick={onClose}
+                >
+                    <X size={20} />
+                </button>
+              </motion.div>
+            </div>
+          </>
         )}
-      </motion.div>
-    </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {isEditingLyrics && (
+          <FullScreenTextEditor
+            title={`Edit Lyrics`}
+            initialValue={song.lyrics}
+            onSave={handleSaveLyrics}
+            onClose={() => setIsEditingLyrics(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

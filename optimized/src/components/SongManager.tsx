@@ -1,47 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Search, Edit, Trash2, Music, Globe } from 'lucide-react';
-import SongDetailsModal from './SongDetailsModal';
+import { Plus, Search, Edit, Trash2, Music } from 'lucide-react';
+import { Song as SongType } from '../types';
+import { formatDistanceToNow } from 'date-fns';
 
 interface SongManagerProps {
-  onSelectSong: (song: any) => void;
-  onAddNewSong: () => void;
+  songs: SongType[];
+  onSelectSong: (song: SongType) => void;
+  onAddSong: () => void;
+  onEditSong: (song: SongType) => void;
 }
 
-const SongManager: React.FC<SongManagerProps> = ({ onSelectSong, onAddNewSong }) => {
+const SongManager: React.FC<SongManagerProps> = ({ songs, onSelectSong, onAddSong, onEditSong }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLanguage, setSelectedLanguage] = useState('all');
-  const [songForModal, setSongForModal] = useState<any | null>(null);
-
-  const [mockSongs, setMockSongs] = useState([
-    {
-      id: 1,
-      title: 'Amazing Grace',
-      lyrics: 'Amazing grace, how sweet the sound...',
-      alternateTitle: 'अद्भुत अनुग्रह',
-      language: 'english',
-      category: 'Hymns',
-      updatedAt: '2 hours ago'
-    },
-    {
-      id: 2,
-      title: 'How Great Thou Art',
-      lyrics: 'O Lord my God, when I in awesome wonder...',
-      alternateTitle: 'कितना महान है तू',
-      language: 'english',
-      category: 'Worship',
-      updatedAt: '1 day ago'
-    },
-    {
-      id: 3,
-      title: 'येशु नाम सुन्दर',
-      lyrics: 'येशु नाम सुन्दर नाम...',
-      alternateTitle: 'Jesus Name Beautiful',
-      language: 'hindi',
-      category: 'Praise',
-      updatedAt: '3 days ago'
-    }
-  ]);
 
   const languages = [
     { id: 'all', label: 'All Languages', flag: '🌍' },
@@ -52,24 +24,29 @@ const SongManager: React.FC<SongManagerProps> = ({ onSelectSong, onAddNewSong })
     { id: 'malayalam', label: 'Malayalam', flag: '🇮🇳' },
   ];
 
-  const handleSaveSong = (updatedSong: any) => {
-    setMockSongs(mockSongs.map(s => s.id === updatedSong.id ? updatedSong : s));
-    setSongForModal(null);
-  };
+  const filteredSongs = useMemo(() => songs.filter(song => {
+    const searchMatch = searchTerm.trim() === '' ||
+                        song.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        (song.alternateTitle && song.alternateTitle.toLowerCase().includes(searchTerm.toLowerCase()));
+
+    const languageMatch = selectedLanguage === 'all' || song.language === selectedLanguage;
+
+    return searchMatch && languageMatch;
+  }), [songs, searchTerm, selectedLanguage]);
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h2 className="font-playfair text-3xl font-bold text-gray-800">Song Library</h2>
-          <p className="text-gray-600 font-inter">Manage your choir's repertoire</p>
+          <p className="text-gray-600 font-inter">Manage your Song repertoire</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          onClick={onAddNewSong}
-          className="flex items-center space-x-2 bg-gradient-to-r from-rose-500 to-violet-500 text-white px-6 py-3 rounded-xl font-inter hover:shadow-lg transition-all"
+          onClick={onAddSong}
+          className="flex items-center space-x-2 bg-gradient-to-r from-rose-500 to-violet-500 text-white px-5 py-2.5 rounded-xl font-inter hover:shadow-lg transition-all text-sm md:text-base"
         >
           <Plus size={20} />
           <span>Add New Song</span>
@@ -77,12 +54,12 @@ const SongManager: React.FC<SongManagerProps> = ({ onSelectSong, onAddNewSong })
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
           <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search songs..."
+            placeholder="Search songs by title..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 font-inter"
@@ -92,7 +69,7 @@ const SongManager: React.FC<SongManagerProps> = ({ onSelectSong, onAddNewSong })
         <select
           value={selectedLanguage}
           onChange={(e) => setSelectedLanguage(e.target.value)}
-          className="px-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 font-inter"
+          className="w-full md:w-auto px-4 py-3 bg-white/70 backdrop-blur-sm border border-white/30 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 font-inter"
         >
           {languages.map((lang) => (
             <option key={lang.id} value={lang.id}>
@@ -104,58 +81,49 @@ const SongManager: React.FC<SongManagerProps> = ({ onSelectSong, onAddNewSong })
 
       {/* Songs Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {mockSongs.map((song) => (
+        {filteredSongs.map((song) => (
           <motion.div
             key={song.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             whileHover={{ y: -5 }}
-            className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:shadow-lg transition-all cursor-pointer"
-            onClick={() => setSongForModal(song)}
+            className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:shadow-lg transition-all flex flex-col"
           >
-            <div className="flex items-start justify-between mb-4">
-              <div className="w-12 h-12 bg-gradient-to-r from-rose-400 to-violet-400 rounded-xl flex items-center justify-center">
-                <Music className="text-white" size={24} />
+            <div onClick={() => onSelectSong(song)} className="cursor-pointer flex-grow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-rose-400 to-violet-400 rounded-xl flex items-center justify-center">
+                  <Music className="text-white" size={24} />
+                </div>
               </div>
+              <h3 className="font-playfair text-xl font-bold text-gray-800 mb-1 truncate">{song.title}</h3>
+              {song.author && <p className="text-sm text-gray-500 font-inter mb-2 truncate">by {song.author}</p>}
+              {song.alternateTitle && <p className="text-gray-600 font-inter mb-3 truncate">{song.alternateTitle}</p>}
+            </div>
+            
+            <div className="flex items-center justify-between text-sm mt-4 pt-4 border-t border-white/30">
               <div className="flex space-x-2">
-                <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-white/50 rounded-lg transition-all" onClick={(e) => { e.stopPropagation(); setSongForModal(song); }}>
+                <button
+                  className="p-2 text-gray-400 hover:text-gray-800 hover:bg-white/50 rounded-lg transition-all"
+                  onClick={(e) => { e.stopPropagation(); onEditSong(song); }}
+                  aria-label="Edit Song"
+                >
                   <Edit size={16} />
                 </button>
-                <button className="p-2 text-gray-400 hover:text-red-500 hover:bg-white/50 rounded-lg transition-all" onClick={(e) => e.stopPropagation()}>
+                <button
+                  className="p-2 text-gray-400 hover:text-red-500 hover:bg-white/50 rounded-lg transition-all"
+                  onClick={(e) => e.stopPropagation()}
+                  aria-label="Delete Song"
+                >
                   <Trash2 size={16} />
                 </button>
               </div>
-            </div>
-            
-            <h3 className="font-playfair text-xl font-bold text-gray-800 mb-2">
-              {song.title}
-            </h3>
-            
-            {song.alternateTitle && (
-              <p className="text-gray-600 font-inter mb-3">
-                {song.alternateTitle}
-              </p>
-            )}
-            
-            <div className="flex items-center justify-between text-sm">
-              <span className="bg-rose-100 text-rose-700 px-3 py-1 rounded-full font-inter">
-                {song.category}
-              </span>
               <span className="text-gray-500 font-inter">
-                {song.updatedAt}
+                {formatDistanceToNow(new Date(song.updatedAt), { addSuffix: true })}
               </span>
             </div>
           </motion.div>
         ))}
       </div>
-
-      {songForModal && (
-        <SongDetailsModal
-          song={songForModal}
-          onClose={() => setSongForModal(null)}
-          onSave={handleSaveSong}
-        />
-      )}
     </div>
   );
 };

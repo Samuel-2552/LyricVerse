@@ -9,7 +9,7 @@ const BehindTheSong: React.FC = () => {
     const handleScroll = () => {
       const element = document.getElementById('behind-song');
       if (!element) return;
-
+      
       const rect = element.getBoundingClientRect();
       const elementHeight = element.offsetHeight;
       const windowHeight = window.innerHeight;
@@ -25,6 +25,9 @@ const BehindTheSong: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+
+
 
   const verses = [
     {
