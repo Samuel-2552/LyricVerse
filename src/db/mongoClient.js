@@ -13,7 +13,7 @@ async function connectToMongo() {
   client = new MongoClient(uri, { useUnifiedTopology: true });
   await client.connect();
   db = client.db(dbName);
-  console.log('Connected to MongoDB');
+  console.log('Connected to MongoDB database:', db.databaseName);
   return db;
 }
 
